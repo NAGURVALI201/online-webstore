@@ -1,6 +1,7 @@
 package com.ecommerce.webstore.service;
 
 import com.ecommerce.webstore.DTO.ProductDto;
+import com.ecommerce.webstore.exceptions.ProductNotFoundException;
 import com.ecommerce.webstore.model.Product;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -19,7 +20,7 @@ public class ProductServiceFakeStoreApi implements ProductService{
     }
 
     @Override
-    public Product getSingleProduct(Long id) {
+    public Product getSingleProduct(Long id) throws ProductNotFoundException{
 
         ProductDto productDtoObj = restTemplate.getForObject(
                 "https://fakestoreapi.com/products/"+id,
@@ -28,7 +29,7 @@ public class ProductServiceFakeStoreApi implements ProductService{
 
         if(productDtoObj==null)
         {
-            return null;
+            throw new ProductNotFoundException("Product with the given id : " + id + " is not available.");
         }
         return productDtoObj.toProduct();
     }

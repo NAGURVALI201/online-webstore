@@ -1,9 +1,13 @@
 package com.ecommerce.webstore.controller;
 
 
+import com.ecommerce.webstore.DTO.ErrorDto;
 import com.ecommerce.webstore.DTO.ProductDto;
+import com.ecommerce.webstore.exceptions.ProductNotFoundException;
 import com.ecommerce.webstore.model.Product;
 import com.ecommerce.webstore.service.ProductService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -23,9 +27,10 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    private Product getProduct(@PathVariable("id") Long id)
+    private ResponseEntity<Product> getProduct(@PathVariable("id") Long id) throws ProductNotFoundException
     {
-        return productServiceObj.getSingleProduct(id);
+        Product product = productServiceObj.getSingleProduct(id);
+        return new ResponseEntity<>(product, HttpStatus.OK);
     }
     @GetMapping("")
     private List<Product> getAllProducts()
@@ -36,5 +41,14 @@ public class ProductController {
     private Product createProduct(@RequestBody ProductDto productDto)
     {
         return productServiceObj.createProduct(productDto);
+    }
+
+    // if the above mapping methods throw the ProductNotFoundException then spring will
+    // automatically invoke the below function.
+    @ExceptionHandler(ProductNotFoundException.class)
+    private ResponseEntity<ErrorDto> productNotFoundClassHandler(Exception e)
+    {
+        ErrorDto errorObj = new ErrorDto(e.getMessage());
+        return new ResponseEntity<>(errorObj,HttpStatus.NOT_FOUND);
     }
 }
